@@ -1,0 +1,1444 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtual Birthday Surprise</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Great Vibes, Alex Brush, Playfair Display, Lora, Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Alex+Brush&family=Great+Vibes&family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,600;1,400;1,600&family=Playfair+Display:ital,wght@0,500;0,700;1,500&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(90deg, #1b0312 0%, #520838 35%, #b5137c 75%, #e61c9c 100%);
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow-x: hidden;
+            background: var(--bg-gradient);
+            font-family: 'Inter', sans-serif;
+            color: #ffffff;
+        }
+
+        /* Ambient Background Glow & Floating Particles */
+        .bg-stage {
+            position: fixed;
+            inset: 0;
+            background: var(--bg-gradient);
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .bg-vignette {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle at 65% 50%, rgba(255, 80, 190, 0.15) 0%, rgba(15, 2, 10, 0.55) 100%);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Calligraphic Typography */
+        .font-script {
+            font-family: 'Great Vibes', 'Alex Brush', cursive;
+            font-weight: 400;
+            text-shadow: 0 4px 18px rgba(0, 0, 0, 0.45), 0 0 25px rgba(255, 180, 230, 0.35);
+        }
+
+        .font-letter {
+            font-family: 'Lora', 'Playfair Display', serif;
+        }
+
+        /* Page Transitions */
+        .page-section {
+            position: fixed;
+            inset: 0;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(0.96);
+            transition: opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1), transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+            overflow-y: auto;
+        }
+
+        .page-section.active {
+            opacity: 1;
+            pointer-events: auto;
+            transform: scale(1);
+        }
+
+        /* Lens Flare Starburst Effect */
+        .lens-flare {
+            position: absolute;
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 245, 200, 0.95) 0%, rgba(255, 160, 90, 0.55) 28%, rgba(230, 28, 156, 0.15) 60%, transparent 75%);
+            pointer-events: none;
+            filter: blur(2px);
+            animation: flarePulse 3s infinite ease-in-out;
+        }
+
+        .lens-flare::before,
+        .lens-flare::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(90deg, transparent, rgba(255, 250, 220, 0.9), transparent);
+        }
+
+        .lens-flare::before {
+            width: 190px;
+            height: 3px;
+        }
+
+        .lens-flare::after {
+            width: 3px;
+            height: 190px;
+            background: linear-gradient(180deg, transparent, rgba(255, 250, 220, 0.9), transparent);
+        }
+
+        @keyframes flarePulse {
+            0%, 100% { transform: scale(0.92) rotate(0deg); opacity: 0.75; }
+            50% { transform: scale(1.12) rotate(8deg); opacity: 1; }
+        }
+
+        /* Sealed Envelope (Page 0) */
+        .envelope-wrapper {
+            position: relative;
+            width: min(320px, 82vw);
+            height: min(210px, 54vw);
+            cursor: pointer;
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            filter: drop-shadow(0 18px 32px rgba(0, 0, 0, 0.55));
+        }
+
+        .envelope-wrapper:hover {
+            transform: translateY(-6px) scale(1.03);
+        }
+
+        .envelope-body {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #fdfbf7 0%, #ede6d6 100%);
+            border-radius: 6px;
+            overflow: hidden;
+            box-shadow: inset 0 0 25px rgba(180, 160, 130, 0.25);
+        }
+
+        /* Subtle paper grain overlay */
+        .paper-grain {
+            background-image: radial-gradient(rgba(120, 100, 80, 0.08) 1px, transparent 0);
+            background-size: 12px 12px;
+        }
+
+        .envelope-flap-left {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, #f3ede0, #e6decb);
+            clip-path: polygon(0 0, 52% 52%, 0 100%);
+            z-index: 2;
+        }
+
+        .envelope-flap-right {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(270deg, #f3ede0, #e6decb);
+            clip-path: polygon(100% 0, 48% 52%, 100% 100%);
+            z-index: 2;
+        }
+
+        .envelope-flap-bottom {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(0deg, #f8f4ea 0%, #e7dec9 100%);
+            clip-path: polygon(0 100%, 50% 46%, 100% 100%);
+            z-index: 3;
+            filter: drop-shadow(0 -2px 4px rgba(0,0,0,0.08));
+        }
+
+        .envelope-flap-top {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, #fbf8f1 0%, #e5dcc6 100%);
+            clip-path: polygon(0 0, 100% 0, 50% 56%);
+            z-index: 4;
+            transform-origin: top center;
+            transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.18));
+        }
+
+        .envelope-wrapper.opening .envelope-flap-top {
+            transform: rotateX(180deg);
+        }
+
+        /* Glossy Metallic Magenta-Purple Wax Seal */
+        .wax-seal {
+            position: absolute;
+            top: 52%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 58px;
+            height: 58px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 32% 28%, #ff7be5 0%, #c81496 42%, #750454 85%, #4a0134 100%);
+            box-shadow:
+                0 6px 14px rgba(45, 0, 30, 0.55),
+                inset 0 2px 5px rgba(255, 220, 250, 0.8),
+                inset 0 -3px 6px rgba(55, 0, 40, 0.8);
+            z-index: 5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.4s ease, opacity 0.4s ease;
+        }
+
+        .wax-seal::before {
+            content: '';
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            border: 1.5px solid rgba(255, 190, 240, 0.45);
+            box-shadow: inset 0 2px 4px rgba(50, 0, 35, 0.5);
+        }
+
+        .wax-seal::after {
+            content: '♥';
+            position: absolute;
+            color: rgba(255, 215, 245, 0.85);
+            font-size: 16px;
+            text-shadow: 0 1px 2px rgba(70, 0, 45, 0.8);
+        }
+
+        .envelope-wrapper.opening .wax-seal {
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(1.3);
+        }
+
+        /* Opened Envelope Reveal (Page 1) */
+        .opened-envelope-stage {
+            position: relative;
+            width: min(320px, 78vw);
+            height: min(290px, 72vw);
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
+        .opened-back {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 64%;
+            background: #d8ccb4;
+            border-radius: 4px;
+            box-shadow: 0 20px 38px rgba(0,0,0,0.5);
+        }
+
+        .opened-top-flap {
+            position: absolute;
+            bottom: 63%;
+            width: 100%;
+            height: 36%;
+            background: linear-gradient(0deg, #e7dec8 0%, #f7f3e8 100%);
+            clip-path: polygon(0 100%, 50% 0, 100% 100%);
+            z-index: 1;
+        }
+
+        /* Torn-edge White Greeting Card */
+        .greeting-card {
+            position: relative;
+            width: 78%;
+            height: 78%;
+            bottom: 16%;
+            background: #ffffff;
+            z-index: 2;
+            padding: 1.25rem 0.75rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+            clip-path: polygon(
+                0% 2%, 6% 0%, 14% 3%, 22% 0%, 31% 2%, 40% 0%, 49% 3%, 58% 0%, 67% 2%, 76% 0%, 85% 3%, 93% 0%, 100% 2%,
+                99% 15%, 100% 30%, 98% 48%, 100% 65%, 99% 82%, 100% 100%,
+                0% 100%, 1% 80%, 0% 62%, 2% 45%, 0% 28%, 1% 12%
+            );
+            animation: cardRise 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        @keyframes cardRise {
+            from { transform: translateY(45px); opacity: 0.4; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .opened-front-pocket {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 64%;
+            background: linear-gradient(180deg, #f3ede0 0%, #e4dac4 100%);
+            clip-path: polygon(0 0, 50% 48%, 100% 0, 100% 100%, 0 100%);
+            z-index: 3;
+            border-radius: 0 0 4px 4px;
+            box-shadow: inset 0 -6px 14px rgba(150, 130, 100, 0.2);
+        }
+
+        /* Heart-shaped Glowing Pink Frame */
+        .heart-photo-frame {
+            width: 138px;
+            height: 126px;
+            position: relative;
+            filter: drop-shadow(0 0 16px rgba(255, 110, 210, 0.9)) drop-shadow(0 8px 16px rgba(0,0,0,0.45));
+            animation: floatSlow 4.5s ease-in-out infinite;
+        }
+
+        .heart-mask {
+            width: 100%;
+            height: 100%;
+            background: #ff77d4;
+            padding: 4px;
+            clip-path: path('M 69 122 C 69 122 6 82 6 38 C 6 16 23 2 43 2 C 55 2 65 9 69 18 C 73 9 83 2 95 2 C 115 2 132 16 132 38 C 132 82 69 122 69 122 Z');
+        }
+
+        .heart-mask img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            clip-path: path('M 65 114 C 65 114 4 76 4 35 C 4 15 20 2 39 2 C 50 2 60 8 65 17 C 70 8 80 2 91 2 C 110 2 126 15 126 35 C 126 76 65 114 65 114 Z');
+        }
+
+        /* Polaroid Cards */
+        .polaroid-card {
+            background: #ffffff;
+            padding: 7px 7px 22px 7px;
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.48);
+            border-radius: 2px;
+            transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.35s ease;
+            cursor: pointer;
+        }
+
+        .polaroid-card:hover {
+            transform: scale(1.08) rotate(0deg) !important;
+            z-index: 30;
+            box-shadow: 0 16px 34px rgba(0, 0, 0, 0.65), 0 0 20px rgba(255, 160, 230, 0.45);
+        }
+
+        /* Photobooth 3-Strip */
+        .photobooth-strip {
+            background: #ffffff;
+            padding: 7px 7px 14px 7px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5);
+            border-radius: 2px;
+        }
+
+        /* Neon Green BACK Button (Exact match from video) */
+        .btn-back-green {
+            position: fixed;
+            top: 20px;
+            right: 24px;
+            z-index: 40;
+            background: linear-gradient(180deg, #52ff26 0%, #24d100 100%);
+            color: #0b1905;
+            font-family: 'Inter', sans-serif;
+            font-weight: 800;
+            font-size: 0.92rem;
+            letter-spacing: 0.04em;
+            padding: 8px 18px;
+            border-radius: 9999px;
+            border: 2.5px solid #0e2406;
+            box-shadow: 0 4px 14px rgba(57, 255, 20, 0.45), inset 0 2px 3px rgba(255, 255, 255, 0.65);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .btn-back-green:hover {
+            transform: scale(1.06);
+            box-shadow: 0 6px 20px rgba(57, 255, 20, 0.75);
+        }
+
+        .btn-back-green:active {
+            transform: scale(0.96);
+        }
+
+        /* Choose the Surprise Hub Items */
+        .surprise-item {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            padding: 0.75rem;
+        }
+
+        .surprise-item:hover {
+            transform: translateY(-10px) scale(1.08);
+        }
+
+        .surprise-item .item-flare {
+            position: absolute;
+            top: 38%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 235, 175, 0.85) 0%, rgba(255, 145, 70, 0.35) 35%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+            transition: transform 0.35s ease, opacity 0.35s ease;
+        }
+
+        .surprise-item:hover .item-flare {
+            transform: translate(-50%, -50%) scale(1.3);
+        }
+
+        .surprise-label {
+            margin-top: 0.75rem;
+            font-family: 'Great Vibes', cursive;
+            font-size: clamp(1.75rem, 3vw, 2.35rem);
+            color: #ffffff;
+            text-decoration: underline;
+            text-decoration-thickness: 1.5px;
+            text-underline-offset: 6px;
+            text-shadow: 0 3px 12px rgba(0,0,0,0.5);
+        }
+
+        /* Crumpled White Paper Note (Page 4) */
+        .crumpled-note {
+            position: relative;
+            background:
+                linear-gradient(135deg, rgba(255,255,255,0.96) 0%, rgba(236,236,240,0.94) 48%, rgba(252,252,255,0.97) 52%, rgba(226,228,234,0.95) 100%);
+            color: #1f1b24;
+            border-radius: 14px;
+            padding: 1.75rem 1.75rem 2.75rem 1.75rem;
+            box-shadow:
+                0 20px 45px rgba(0, 0, 0, 0.55),
+                inset 0 0 35px rgba(170, 170, 185, 0.35);
+            transform: rotate(-4deg);
+            overflow: visible;
+        }
+
+        /* Subtle paper crease lines */
+        .crumpled-note::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 14px;
+            background:
+                linear-gradient(32deg, transparent 42%, rgba(160,165,180,0.22) 49%, rgba(255,255,255,0.7) 51%, transparent 58%),
+                linear-gradient(-40deg, transparent 35%, rgba(150,155,170,0.18) 48%, rgba(255,255,255,0.65) 50%, transparent 62%),
+                linear-gradient(75deg, transparent 60%, rgba(160,165,180,0.2) 68%, rgba(255,255,255,0.6) 70%, transparent 78%);
+            pointer-events: none;
+        }
+
+        /* Ornate Vintage Gold Picture Frame */
+        .gold-frame {
+            position: relative;
+            padding: 12px;
+            background: linear-gradient(135deg, #f9e27d 0%, #c8962c 25%, #fff1a8 50%, #9e6f14 75%, #e5be53 100%);
+            border-radius: 6px;
+            box-shadow:
+                0 14px 30px rgba(0, 0, 0, 0.55),
+                inset 0 0 0 2px #7a5209,
+                inset 0 0 8px rgba(60, 35, 0, 0.65);
+        }
+
+        .gold-frame-inner {
+            border: 3px solid #8a5d0d;
+            box-shadow: inset 0 3px 10px rgba(0, 0, 0, 0.55);
+            overflow: hidden;
+            background: #23180d;
+            width: 100%;
+            height: 100%;
+        }
+
+        .gold-frame-inner img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* Vinyl Spinning Animation */
+        @keyframes spinSlow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .vinyl-spinning {
+            animation: spinSlow 6s linear infinite;
+        }
+
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px) rotate(-3deg); }
+            50% { transform: translateY(-7px) rotate(-1deg); }
+        }
+
+        .float-gentle {
+            animation: floatSlow 4s ease-in-out infinite;
+        }
+
+        /* Custom Scrollbar for Drawer */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.06);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(230, 28, 156, 0.6);
+            border-radius: 999px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Ambient Background & Sparkle Canvas -->
+    <div class="bg-stage">
+        <canvas id="sparkleCanvas" class="w-full h-full block"></canvas>
+    </div>
+    <div class="bg-vignette"></div>
+
+    <!-- =====================================================================
+         PAGE 0: PRESS THE ENVELOPE (LANDING PAGE)
+    ====================================================================== -->
+    <section id="page-0" class="page-section active">
+        <h1 class="font-script text-5xl sm:text-6xl md:text-7xl text-white mb-10 sm:mb-12 tracking-wide text-center">
+            Press the Envelope
+        </h1>
+
+        <div id="sealedEnvelope" class="envelope-wrapper" role="button" tabindex="0" aria-label="Buka Amplop Ulang Tahun">
+            <div class="envelope-body paper-grain">
+                <div class="envelope-flap-left"></div>
+                <div class="envelope-flap-right"></div>
+                <div class="envelope-flap-bottom"></div>
+                <div class="envelope-flap-top"></div>
+                <div class="wax-seal"></div>
+            </div>
+        </div>
+
+        <p id="tapToLanjut" class="font-letter italic text-lg sm:text-xl text-white/90 mt-8 tracking-wide cursor-pointer hover:text-pink-200 transition">
+            tap to lanjut
+        </p>
+    </section>
+
+    <!-- =====================================================================
+         PAGE 1: OPENED ENVELOPE REVEAL ("HAPPY BIRTHDAY NOVAAA")
+    ====================================================================== -->
+    <section id="page-1" class="page-section">
+        <div class="relative w-full max-w-4xl flex flex-col items-center justify-center my-auto py-4">
+
+            <!-- Main Collage Cluster -->
+            <div class="relative flex flex-col md:flex-row items-center justify-center gap-6 md:gap-4 w-full">
+
+                <!-- Left Collage: Heart Frame + Polaroid + Butterfly -->
+                <div class="relative flex flex-col items-center md:mr-2 z-20">
+                    <!-- Heart Glowing Photo -->
+                    <div class="heart-photo-frame -mb-3 -ml-6">
+                        <div class="heart-mask">
+                            <img id="img-p1-heart" src="assets/G1.jpeg
+                            ">
+                        </div>
+                    </div>
+
+                    <!-- Tilted Polaroid below heart -->
+                    <div class="polaroid-card w-32 sm:w-36 -rotate-12 mt-1 shadow-2xl" onclick="openLightbox(this.querySelector('img').src)">
+                        <img id="img-p1-polaroid" src="assets/G2.jpeg" alt="Polaroid" class="w-full h-28 sm:h-32 object-cover">
+                    </div>
+
+                    <!-- Pink Butterfly Sticker (SVG) -->
+                    <svg class="w-16 h-16 sm:w-20 sm:h-20 absolute -bottom-3 -right-8 drop-shadow-[0_6px_12px_rgba(0,0,0,0.45)] float-gentle pointer-events-none" viewBox="0 0 100 100">
+                        <defs>
+                            <linearGradient id="wingGrad" x1="0" y1="0" x2="1" y2="1">
+                                <stop offset="0%" stop-color="#ffb8e6"/>
+                                <stop offset="55%" stop-color="#f249b3"/>
+                                <stop offset="100%" stop-color="#8c0d5e"/>
+                            </linearGradient>
+                        </defs>
+                        <g transform="rotate(-18 50 50)">
+                            <path d="M48 48 C25 15, 2 22, 12 48 C18 62, 36 58, 48 52 Z" fill="url(#wingGrad)" stroke="#ffd6f0" stroke-width="1"/>
+                            <path d="M52 48 C75 15, 98 22, 88 48 C82 62, 64 58, 52 52 Z" fill="url(#wingGrad)" stroke="#ffd6f0" stroke-width="1"/>
+                            <path d="M48 52 C28 56, 15 78, 30 85 C42 90, 48 72, 49 56 Z" fill="url(#wingGrad)" stroke="#ffd6f0" stroke-width="1"/>
+                            <path d="M52 52 C72 56, 85 78, 70 85 C58 90, 52 72, 51 56 Z" fill="url(#wingGrad)" stroke="#ffd6f0" stroke-width="1"/>
+                            <ellipse cx="50" cy="54" rx="2.5" ry="16" fill="#3d0527"/>
+                            <path d="M49 38 Q42 26 36 25 M51 38 Q58 26 64 25" stroke="#3d0527" stroke-width="1.5" fill="none"/>
+                        </g>
+                    </svg>
+                </div>
+
+                <!-- Center: Opened Envelope with Happy Birthday Card & Roses -->
+                <div class="relative z-10 mx-2">
+                    <!-- Pink Rose Top Right of Envelope -->
+                    <svg class="w-16 h-16 sm:w-20 sm:h-20 absolute -top-2 -right-5 z-20 drop-shadow-lg pointer-events-none" viewBox="0 0 100 100">
+                        <path d="M20 75 Q10 60 28 55 Q35 72 20 75 Z" fill="#2d7a3e"/>
+                        <path d="M78 78 Q92 65 74 56 Q65 72 78 78 Z" fill="#236331"/>
+                        <circle cx="50" cy="50" r="28" fill="#d62478"/>
+                        <circle cx="46" cy="46" r="22" fill="#f04898"/>
+                        <path d="M32 45 C32 30, 68 30, 68 45 C68 62, 34 64, 34 48 C34 38, 58 38, 58 48 C58 55, 42 55, 44 47" fill="none" stroke="#ff99cc" stroke-width="3.5" stroke-linecap="round"/>
+                    </svg>
+
+                    <!-- Pink Rose Bottom Left of Envelope -->
+                    <svg class="w-16 h-16 sm:w-20 sm:h-20 absolute bottom-6 -left-7 z-20 drop-shadow-lg pointer-events-none" viewBox="0 0 100 100">
+                        <path d="M18 65 Q5 48 26 44 Q32 62 18 65 Z" fill="#2d7a3e"/>
+                        <circle cx="50" cy="52" r="26" fill="#e03888"/>
+                        <circle cx="52" cy="48" r="20" fill="#ff69b4"/>
+                        <path d="M36 48 C36 34, 66 34, 66 48 C66 62, 38 62, 38 49 C38 40, 58 40, 58 49" fill="none" stroke="#ffc2e2" stroke-width="3.2" stroke-linecap="round"/>
+                    </svg>
+
+                    <!-- Lily Blossom Right -->
+                    <svg class="w-14 h-14 absolute bottom-12 -right-6 z-20 drop-shadow-md pointer-events-none" viewBox="0 0 100 100">
+                        <g fill="#ffb6dc" stroke="#fff" stroke-width="1">
+                            <ellipse cx="50" cy="24" rx="10" ry="22"/>
+                            <ellipse cx="50" cy="76" rx="10" ry="22"/>
+                            <ellipse cx="24" cy="50" rx="22" ry="10"/>
+                            <ellipse cx="76" cy="50" rx="22" ry="10"/>
+                        </g>
+                        <circle cx="50" cy="50" r="8" fill="#ffe066"/>
+                    </svg>
+
+                    <div class="opened-envelope-stage">
+                        <div class="opened-top-flap"></div>
+                        <div class="opened-back"></div>
+
+                        <!-- Greeting Card -->
+                        <div class="greeting-card">
+                            <h2 class="font-script text-4xl sm:text-5xl text-[#9b1b78] leading-tight text-center mt-1" style="text-shadow: 0 2px 6px rgba(155, 27, 120, 0.22);">
+                                Happy<br>Birthday Novaa
+                            </h2>
+                            <p id="display-date" class="font-letter font-semibold text-xs sm:text-sm text-[#7a165e] tracking-widest mt-2">
+                                28.08.26
+                            </p>
+                        </div>
+
+                        <div class="opened-front-pocket"></div>
+                    </div>
+                </div>
+
+                <!-- Right Collage: Vertical 3-Photo Strip -->
+                <div class="relative z-20 md:ml-2">
+                    <div class="photobooth-strip w-28 sm:w-32 rotate-6">
+                        <img id="img-p1-strip1" src="assets/G3.jpeg">
+                        <img id="img-p1-strip2" src="assets/G4.jpeg">
+                        <img id="img-p1-strip3" src="assets/G5.jpeg">
+                    </div>
+                    <!-- Small White Blossom Flower -->
+                    <svg class="w-11 h-11 absolute -bottom-3 -left-4 drop-shadow-md pointer-events-none" viewBox="0 0 100 100">
+                        <g fill="#fff8fc">
+                            <circle cx="50" cy="26" r="15"/>
+                            <circle cx="73" cy="43" r="15"/>
+                            <circle cx="64" cy="70" r="15"/>
+                            <circle cx="36" cy="70" r="15"/>
+                            <circle cx="27" cy="43" r="15"/>
+                        </g>
+                        <circle cx="50" cy="50" r="10" fill="#ff9ed2"/>
+                    </svg>
+                </div>
+
+            </div>
+
+            <!-- TAP FOR SURPRISE CTA -->
+            <button id="btnTapSurprise" onclick="goToPage(2)" class="mt-8 sm:mt-10 font-inter font-bold text-base sm:text-lg tracking-[0.14em] uppercase text-white underline decoration-2 underline-offset-8 hover:text-pink-200 hover:scale-105 transition-all cursor-pointer drop-shadow-[0_4px_12px_rgba(0,0,0,0.6)]">
+                TAP FOR SURPRISE
+            </button>
+        </div>
+    </section>
+
+    <!-- =====================================================================
+         PAGE 2: CHOOSE THE SURPRISE (MAIN HUB)
+    ====================================================================== -->
+    <section id="page-2" class="page-section">
+        <h1 class="font-script text-5xl sm:text-6xl md:text-7xl text-white mb-10 sm:mb-14 text-center">
+            Choose the Surprise
+        </h1>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-10 max-w-4xl w-full px-4">
+            <!-- 1. JOURNEY (Retro Rangefinder Camera) -->
+            <div class="surprise-item" onclick="goToPage(3)">
+                <div class="item-flare"></div>
+                <svg class="w-28 h-24 sm:w-36 sm:h-28 relative z-10 drop-shadow-[0_12px_18px_rgba(0,0,0,0.6)]" viewBox="0 0 160 120">
+                    <defs>
+                        <linearGradient id="metalSilver" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#f4f6f8"/>
+                            <stop offset="50%" stop-color="#c4cad0"/>
+                            <stop offset="100%" stop-color="#8b929a"/>
+                        </linearGradient>
+                        <radialGradient id="lensGlass" cx="40%" cy="35%" r="60%">
+                            <stop offset="0%" stop-color="#68b5ff"/>
+                            <stop offset="35%" stop-color="#182c4a"/>
+                            <stop offset="80%" stop-color="#090d14"/>
+                            <stop offset="100%" stop-color="#2e4057"/>
+                        </radialGradient>
+                    </defs>
+                    <!-- Top buttons -->
+                    <rect x="28" y="14" width="18" height="8" rx="2" fill="url(#metalSilver)"/>
+                    <rect x="112" y="12" width="22" height="10" rx="2" fill="url(#metalSilver)"/>
+                    <!-- Camera Body -->
+                    <rect x="16" y="22" width="128" height="82" rx="10" fill="url(#metalSilver)" stroke="#5c6268" stroke-width="1.5"/>
+                    <!-- Black Leatherette Grip -->
+                    <rect x="16" y="42" width="128" height="48" fill="#1e2024"/>
+                    <!-- Viewfinder -->
+                    <rect x="28" y="27" width="20" height="11" rx="2" fill="#23272e" stroke="#7d858d" stroke-width="1.5"/>
+                    <rect x="31" y="29" width="14" height="7" fill="#63b3ed" opacity="0.65"/>
+                    <rect x="64" y="28" width="12" height="9" rx="1.5" fill="#d97706" opacity="0.8"/>
+                    <!-- Lens Barrel -->
+                    <circle cx="84" cy="64" r="34" fill="url(#metalSilver)" stroke="#4a5056" stroke-width="2"/>
+                    <circle cx="84" cy="64" r="28" fill="#181a1f" stroke="#9aa1a9" stroke-width="1.5"/>
+                    <circle cx="84" cy="64" r="20" fill="url(#lensGlass)" stroke="#555" stroke-width="2"/>
+                    <circle cx="77" cy="57" r="4" fill="#ffffff" opacity="0.55"/>
+                </svg>
+                <span class="surprise-label">Journey</span>
+            </div>
+
+            <!-- 2. MOMENT (Vintage Silver Pocket Watch) -->
+            <div class="surprise-item" onclick="goToPage(4)">
+                <div class="item-flare"></div>
+                <svg class="w-28 h-28 sm:w-32 sm:h-32 relative z-10 drop-shadow-[0_12px_18px_rgba(0,0,0,0.6)]" viewBox="0 0 140 150">
+                    <!-- Top Crown & Ring -->
+                    <circle cx="70" cy="18" r="11" fill="none" stroke="#dce1e7" stroke-width="3.5"/>
+                    <rect x="63" y="24" width="14" height="10" rx="2" fill="#b8c0c8"/>
+                    <!-- Outer Silver Case -->
+                    <circle cx="70" cy="84" r="52" fill="url(#metalSilver)" stroke="#5f666e" stroke-width="2"/>
+                    <circle cx="70" cy="84" r="44" fill="#fcfbf7" stroke="#8c949c" stroke-width="2"/>
+                    <!-- Roman Numerals & Ticks -->
+                    <circle cx="70" cy="84" r="38" fill="none" stroke="#333" stroke-width="1" stroke-dasharray="2 4.6"/>
+                    <text x="70" y="53" text-anchor="middle" font-size="9" font-family="serif" font-weight="bold" fill="#1a1a1a">XII</text>
+                    <text x="103" y="87" text-anchor="middle" font-size="9" font-family="serif" font-weight="bold" fill="#1a1a1a">III</text>
+                    <text x="70" y="119" text-anchor="middle" font-size="9" font-family="serif" font-weight="bold" fill="#1a1a1a">VI</text>
+                    <text x="37" y="87" text-anchor="middle" font-size="9" font-family="serif" font-weight="bold" fill="#1a1a1a">IX</text>
+                    <!-- Watch Hands -->
+                    <line x1="70" y1="84" x2="54" y2="66" stroke="#111" stroke-width="3" stroke-linecap="round"/>
+                    <line x1="70" y1="84" x2="92" y2="62" stroke="#111" stroke-width="2" stroke-linecap="round"/>
+                    <circle cx="70" cy="84" r="3.5" fill="#b91c1c"/>
+                </svg>
+                <span class="surprise-label">Moment</span>
+            </div>
+
+            <!-- 3. PLAYLIST (Glossy Black Vinyl Record) -->
+            <div class="surprise-item" onclick="goToPage(5)">
+                <div class="item-flare"></div>
+                <svg class="w-28 h-28 sm:w-32 sm:h-32 relative z-10 drop-shadow-[0_12px_18px_rgba(0,0,0,0.6)]" viewBox="0 0 140 140">
+                    <defs>
+                        <radialGradient id="vinylDisc" cx="50%" cy="50%" r="50%">
+                            <stop offset="0%" stop-color="#111"/>
+                            <stop offset="65%" stop-color="#0a0a0c"/>
+                            <stop offset="85%" stop-color="#222328"/>
+                            <stop offset="100%" stop-color="#09090b"/>
+                        </radialGradient>
+                    </defs>
+                    <circle cx="70" cy="70" r="60" fill="url(#vinylDisc)" stroke="#333" stroke-width="1.5"/>
+                    <!-- Grooves -->
+                    <circle cx="70" cy="70" r="50" fill="none" stroke="rgba(255,255,255,0.09)" stroke-width="1"/>
+                    <circle cx="70" cy="70" r="41" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+                    <circle cx="70" cy="70" r="32" fill="none" stroke="rgba(255,255,255,0.09)" stroke-width="1"/>
+                    <!-- Light Sheen -->
+                    <path d="M25 32 L55 60 M85 80 L115 108" stroke="rgba(255,255,255,0.16)" stroke-width="8" stroke-linecap="round"/>
+                    <!-- Red Center Label -->
+                    <circle cx="70" cy="70" r="21" fill="#dc2626" stroke="#991b1b" stroke-width="1.5"/>
+                    <circle cx="70" cy="70" r="5" fill="#111"/>
+                </svg>
+                <span class="surprise-label">Playlist</span>
+            </div>
+
+            <!-- 4. GIFT (3D Red Gift Box with Gold Satin Bow) -->
+            <div class="surprise-item" onclick="openGiftModal()">
+                <div class="item-flare"></div>
+                <svg class="w-28 h-28 sm:w-32 sm:h-32 relative z-10 drop-shadow-[0_12px_18px_rgba(0,0,0,0.6)]" viewBox="0 0 140 140">
+                    <defs>
+                        <linearGradient id="redBox" x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0%" stop-color="#ff3b3b"/>
+                            <stop offset="60%" stop-color="#d61313"/>
+                            <stop offset="100%" stop-color="#8f0707"/>
+                        </linearGradient>
+                        <linearGradient id="goldRibbon" x1="0" y1="0" x2="1" y2="0">
+                            <stop offset="0%" stop-color="#d99b16"/>
+                            <stop offset="50%" stop-color="#ffe57f"/>
+                            <stop offset="100%" stop-color="#b87d09"/>
+                        </linearGradient>
+                    </defs>
+                    <!-- Box Base -->
+                    <rect x="26" y="54" width="88" height="68" rx="5" fill="url(#redBox)"/>
+                    <!-- Box Lid -->
+                    <rect x="20" y="38" width="100" height="20" rx="4" fill="#ef2323" stroke="#990909" stroke-width="1"/>
+                    <!-- Vertical Gold Ribbon -->
+                    <rect x="61" y="38" width="18" height="84" fill="url(#goldRibbon)"/>
+                    <!-- Horizontal Gold Ribbon -->
+                    <rect x="26" y="78" width="88" height="15" fill="url(#goldRibbon)"/>
+                    <!-- Gold Bow Loops -->
+                    <path d="M70 38 C46 12, 24 26, 46 38 Z" fill="url(#goldRibbon)" stroke="#9e6b05" stroke-width="1"/>
+                    <path d="M70 38 C94 12, 116 26, 94 38 Z" fill="url(#goldRibbon)" stroke="#9e6b05" stroke-width="1"/>
+                    <circle cx="70" cy="37" r="7" fill="#ffd447" stroke="#9e6b05" stroke-width="1"/>
+                </svg>
+                <span class="surprise-label">Gift</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- =====================================================================
+         PAGE 3: JOURNEY (8 SCATTERED POLAROIDS + STICKERS)
+    ====================================================================== -->
+    <section id="page-3" class="page-section">
+        <button class="btn-back-green" onclick="goToPage(2)">
+            BACK <span>◀</span>
+        </button>
+
+        <div class="relative w-full max-w-4xl mx-auto my-auto pt-12 pb-6 px-3">
+            <!-- Top Row of 4 Polaroids -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-5 items-center justify-items-center mb-4 sm:mb-6">
+                <div class="polaroid-card w-36 sm:w-44 -rotate-3" onclick="openLightbox(this.querySelector('img').src)">
+                    <img id="img-j-1" src="assets/j1.jpeg" alt="Memory 1" class="w-full h-36 sm:h-40 object-cover">
+                </div>
+                <div class="polaroid-card w-36 sm:w-44 rotate-2" onclick="openLightbox(this.querySelector('img').src)">
+                    <img id="img-j-2" src="assets/j2.jpeg" alt="Memory 2" class="w-full h-36 sm:h-40 object-cover">
+                </div>
+                <div class="polaroid-card w-36 sm:w-44 -rotate-2" onclick="openLightbox(this.querySelector('img').src)">
+                    <img id="img-j-3" src="assets/j3.jpeg" alt="Memory 3" class="w-full h-36 sm:h-40 object-cover">
+                </div>
+                <div class="polaroid-card w-36 sm:w-44 rotate-3" onclick="openLightbox(this.querySelector('img').src)">
+                    <img id="img-j-4" src="assets/j4.jpeg" alt="Memory 4" class="w-full h-36 sm:h-40 object-cover">
+                </div>
+            </div>
+
+            <!-- Bottom Row of 4 Polaroids -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-5 items-center justify-items-center">
+                <div class="polaroid-card w-36 sm:w-44 rotate-3" onclick="openLightbox(this.querySelector('img').src)">
+                    <img id="img-j-5" src="assets/j5.jpeg" alt="Memory 5" class="w-full h-36 sm:h-40 object-cover">
+                </div>
+                <div class="polaroid-card w-36 sm:w-44 -rotate-3" onclick="openLightbox(this.querySelector('img').src)">
+                    <img id="img-j-6" src="assets/j6.jpeg" alt="Memory 6" class="w-full h-36 sm:h-40 object-cover">
+                </div>
+                <div class="polaroid-card w-36 sm:w-44 rotate-2" onclick="openLightbox(this.querySelector('img').src)">
+                    <img id="img-j-7" src="assets/j7.jpeg" alt="Memory 7" class="w-full h-36 sm:h-40 object-cover">
+                </div>
+                <div class="polaroid-card w-36 sm:w-44 -rotate-2" onclick="openLightbox(this.querySelector('img').src)">
+                    <img id="img-j-8" src="assets/j8.jpeg" alt="Memory 8" class="w-full h-36 sm:h-40 object-cover">
+                </div>
+            </div>
+
+            <!-- Decorative Stickers matching Video -->
+            <!-- Top-left Glowing Pink Heart -->
+            <div class="hidden sm:block absolute -top-2 -left-4 text-6xl text-pink-400/80 drop-shadow-[0_0_18px_rgba(255,105,180,0.9)] pointer-events-none float-gentle">
+                ♥
+            </div>
+            <!-- Center Twin Pink Hearts -->
+            <div class="hidden sm:flex absolute top-1/2 left-[23%] -translate-y-1/2 pointer-events-none z-20 drop-shadow-lg">
+                <span class="text-4xl text-pink-300 -rotate-12">♥</span>
+                <span class="text-3xl text-pink-400 rotate-12 -ml-1 mt-2">♥</span>
+            </div>
+            <!-- Glossy Red Heart -->
+            <div class="hidden sm:block absolute top-[45%] right-[23%] -translate-y-1/2 text-5xl text-red-600 drop-shadow-[0_6px_12px_rgba(0,0,0,0.5)] pointer-events-none z-20">
+                ❤️
+            </div>
+            <!-- Cute Blue Whale Sticker on Right -->
+            <svg class="w-20 h-16 sm:w-24 sm:h-20 absolute top-1/2 -right-2 sm:-right-6 -translate-y-1/2 drop-shadow-xl pointer-events-none z-20 float-gentle" viewBox="0 0 120 90">
+                <path d="M22 52 C22 28, 78 24, 86 50 C90 62, 74 72, 48 72 C30 72, 22 62, 22 52 Z" fill="#38bdf8"/>
+                <path d="M84 48 Q104 34 112 42 Q102 52 94 52 Q104 60 108 68 Q92 66 82 54 Z" fill="#0284c7"/>
+                <path d="M26 56 Q52 68 78 58 C74 70, 34 72, 26 56 Z" fill="#e0f2fe"/>
+                <circle cx="38" cy="48" r="3" fill="#0f172a"/>
+                <!-- Water Spout -->
+                <path d="M52 28 Q48 12 38 14 M54 28 Q58 12 68 14" stroke="#bae6fd" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+            </svg>
+            <!-- Small Saturn Planet Bottom Left -->
+            <svg class="w-16 h-12 absolute -bottom-3 -left-3 drop-shadow-lg pointer-events-none z-20" viewBox="0 0 100 70">
+                <circle cx="50" cy="35" r="18" fill="#eab308"/>
+                <ellipse cx="50" cy="35" rx="38" ry="10" transform="rotate(-22 50 35)" fill="none" stroke="#fde047" stroke-width="4"/>
+            </svg>
+        </div>
+    </section>
+
+    <!-- =====================================================================
+         PAGE 4: MOMENT (CRUMPLED LOVE LETTER + GOLD FRAME + VINYL PLAYER)
+    ====================================================================== -->
+    <section id="page-4" class="page-section">
+        <button class="btn-back-green" onclick="goToPage(2)">
+            BACK <span>◀</span>
+        </button>
+
+        <div class="relative w-full max-w-4xl mx-auto my-auto pt-12 pb-8 px-4 flex flex-col lg:flex-row items-center justify-center gap-8 lg:gap-6">
+
+            <!-- Left: Name Header + Crumpled Paper Note + Red Rose + Mini Vinyl Player -->
+            <div class="relative w-full max-w-md z-20">
+                <!-- Calligraphic Recipient Name -->
+                <h2 id="display-name" class="font-script text-4xl sm:text-5xl text-white mb-2 ml-2 -rotate-3">
+                    Nova Ananda
+                </h2>
+
+                <!-- Crumpled White Paper Card -->
+                <div class="crumpled-note">
+                    <p id="display-message" class="font-letter italic text-sm sm:text-base leading-relaxed text-gray-900 relative z-10">
+                        "Selamat ulang tahun, Sayang. Di hari spesialmu ini, aku cuma mau bilang terima kasih karena sudah lahir ke dunia dan membawa begitu banyak kebahagiaan ke hidupku. Kamu adalah hal terindah yang pernah hadir dalam hidupku, dan aku berharap bisa terus merayakan hari-hari bahagiamu di tahun-tahun berikutnya. I love you so much, kini dan nanti."
+                    </p>
+                </div>
+
+                <!-- Red Rose Bouquet Sticker Bottom-Left of Paper -->
+                <svg class="w-24 h-24 sm:w-28 sm:h-28 absolute -bottom-6 -left-6 z-30 drop-shadow-xl pointer-events-none" viewBox="0 0 120 120">
+                    <path d="M25 90 Q10 65 38 60 Q45 85 25 90 Z" fill="#15803d"/>
+                    <path d="M85 95 Q108 75 82 62 Q70 85 85 95 Z" fill="#166534"/>
+                    <!-- Rose 1 -->
+                    <circle cx="48" cy="70" r="24" fill="#991b1b"/>
+                    <circle cx="46" cy="68" r="18" fill="#dc2626"/>
+                    <path d="M35 68 C35 56, 58 56, 58 68 C58 78, 38 78, 38 69" fill="none" stroke="#fca5a5" stroke-width="2.5"/>
+                    <!-- Rose 2 -->
+                    <circle cx="72" cy="48" r="22" fill="#991b1b"/>
+                    <circle cx="70" cy="46" r="16" fill="#ef4444"/>
+                    <path d="M60 46 C60 35, 82 35, 82 46 C82 55, 62 55, 62 47" fill="none" stroke="#fecaca" stroke-width="2.5"/>
+                </svg>
+
+                <!-- Vinyl Music Player Widget overlapping Bottom-Center of Paper -->
+                <div class="relative z-30 -mt-9 mx-auto w-36 flex flex-col items-center">
+                    <div id="vinylWidget" onclick="toggleMusicBox()" class="w-28 h-28 rounded-full bg-gradient-to-br from-neutral-900 via-black to-neutral-800 border-2 border-neutral-600 shadow-[0_10px_25px_rgba(0,0,0,0.75)] flex items-center justify-center cursor-pointer relative group">
+                        <!-- Grooves -->
+                        <div class="absolute inset-2 rounded-full border border-white/10"></div>
+                        <div class="absolute inset-4 rounded-full border border-white/10"></div>
+                        <!-- Red Center Controls -->
+                        <div class="w-16 h-16 rounded-full bg-red-600 flex items-center justify-center gap-1.5 shadow-inner text-white">
+                            <span class="text-[10px] opacity-80">⏮</span>
+                            <span id="musicPlayIcon" class="text-base font-bold">▶</span>
+                            <span class="text-[10px] opacity-80">⏭</span>
+                        </div>
+                    </div>
+                    <button onclick="toggleMusicBox()" id="musicLabel" class="mt-1.5 px-3 py-0.5 rounded-full bg-black/60 backdrop-blur-sm text-xs font-semibold text-white tracking-wide border border-white/20 hover:bg-pink-600 transition">
+                        Play Musik
+                    </button>
+                </div>
+            </div>
+
+            <!-- Right: Ornate Vintage Gold Frame + Red Rose + Retro Camera Sticker -->
+            <div class="relative z-10 flex items-center justify-center">
+                <!-- Red Rose Top Right -->
+                <svg class="w-20 h-20 absolute -top-6 -right-6 z-30 drop-shadow-xl pointer-events-none" viewBox="0 0 100 100">
+                    <path d="M72 75 Q92 60 72 48 Q60 66 72 75 Z" fill="#15803d"/>
+                    <circle cx="50" cy="48" r="26" fill="#991b1b"/>
+                    <circle cx="48" cy="46" r="20" fill="#dc2626"/>
+                    <path d="M36 46 C36 33, 62 33, 62 46 C62 58, 38 58, 38 47" fill="none" stroke="#fca5a5" stroke-width="2.5"/>
+                </svg>
+
+                <!-- Ornate Gold Portrait Frame -->
+                <div class="gold-frame w-56 h-68 sm:w-64 sm:h-76 rotate-3">
+                    <div class="gold-frame-inner h-60 sm:h-68">
+                        <img id="img-moment-frame" src="assets/j9.jpeg" alt="Moment Portrait">
+                    </div>
+                </div>
+
+                <!-- Retro Camera Overlapping Bottom-Left of Gold Frame -->
+                <svg class="w-28 h-22 absolute -bottom-5 -left-10 z-30 drop-shadow-[0_10px_16px_rgba(0,0,0,0.65)] pointer-events-none" viewBox="0 0 160 120">
+                    <rect x="28" y="14" width="18" height="8" rx="2" fill="#dce1e7"/>
+                    <rect x="112" y="12" width="22" height="10" rx="2" fill="#dce1e7"/>
+                    <rect x="16" y="22" width="128" height="82" rx="10" fill="#cfd5dc" stroke="#555" stroke-width="1.5"/>
+                    <rect x="16" y="42" width="128" height="48" fill="#1a1c20"/>
+                    <rect x="28" y="27" width="20" height="11" rx="2" fill="#23272e"/>
+                    <circle cx="84" cy="64" r="33" fill="#e2e7ec" stroke="#444" stroke-width="2"/>
+                    <circle cx="84" cy="64" r="26" fill="#141619"/>
+                    <circle cx="84" cy="64" r="18" fill="#1e3a5f"/>
+                    <circle cx="78" cy="58" r="4" fill="#fff" opacity="0.55"/>
+                </svg>
+            </div>
+        </div>
+    </section>
+
+    <!-- =====================================================================
+         PAGE 5: PLAYLIST (YOUTUBE EMBED + RETRO RADIO/TV + 3 GOLD FRAMES)
+    ====================================================================== -->
+    <section id="page-5" class="page-section">
+        <button class="btn-back-green" onclick="goToPage(2)">
+            BACK <span>◀</span>
+        </button>
+
+        <div class="relative w-full max-w-5xl mx-auto my-auto pt-12 pb-6 px-4 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+
+            <!-- Left Column (7 cols): YouTube Embed + Vintage Radio & Retro TV -->
+            <div class="lg:col-span-7 flex flex-col items-center">
+                <div class="w-full aspect-video rounded-xl overflow-hidden shadow-[0_18px_40px_rgba(0,0,0,0.65)] border-2 border-white/20 bg-black">
+                    <iframe
+                        id="youtubePlayer"
+                        class="w-full h-full"
+                        src="assets/video.mp4"
+                        title="Birthday Song Playlist"
+                        frameborder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowfullscreen>
+                    </iframe>
+                </div>
+
+                <!-- Vintage Radio & Retro CRT TV below video -->
+                <div class="flex items-end justify-center gap-6 sm:gap-10 mt-5">
+                    <!-- Vintage Boombox Radio -->
+                    <svg class="w-28 h-22 sm:w-32 sm:h-24 drop-shadow-[0_10px_16px_rgba(0,0,0,0.6)]" viewBox="0 0 150 110">
+                        <path d="M35 28 L35 14 L115 14 L115 28" fill="none" stroke="#9ca3af" stroke-width="5" stroke-linecap="round"/>
+                        <rect x="14" y="28" width="122" height="68" rx="8" fill="#374151" stroke="#1f2937" stroke-width="2"/>
+                        <circle cx="42" cy="64" r="20" fill="#111827" stroke="#9ca3af" stroke-width="3"/>
+                        <circle cx="42" cy="64" r="8" fill="#4b5563"/>
+                        <circle cx="108" cy="64" r="20" fill="#111827" stroke="#9ca3af" stroke-width="3"/>
+                        <circle cx="108" cy="64" r="8" fill="#4b5563"/>
+                        <rect x="65" y="42" width="20" height="12" rx="2" fill="#fbbf24"/>
+                        <rect x="65" y="60" width="20" height="22" rx="2" fill="#1f2937" stroke="#6b7280"/>
+                    </svg>
+
+                    <!-- Retro Wooden CRT TV -->
+                    <svg class="w-28 h-24 sm:w-32 sm:h-28 drop-shadow-[0_10px_16px_rgba(0,0,0,0.6)]" viewBox="0 0 150 130">
+                        <line x1="75" y1="30" x2="48" y2="8" stroke="#d1d5db" stroke-width="3" stroke-linecap="round"/>
+                        <line x1="75" y1="30" x2="102" y2="8" stroke="#d1d5db" stroke-width="3" stroke-linecap="round"/>
+                        <rect x="18" y="30" width="114" height="82" rx="10" fill="#78350f" stroke="#451a03" stroke-width="2"/>
+                        <rect x="28" y="40" width="72" height="62" rx="8" fill="#1e293b" stroke="#94a3b8" stroke-width="2"/>
+                        <!-- Static lines -->
+                        <line x1="34" y1="54" x2="94" y2="54" stroke="#64748b" stroke-width="1.5" opacity="0.5"/>
+                        <line x1="34" y1="70" x2="94" y2="70" stroke="#64748b" stroke-width="1.5" opacity="0.5"/>
+                        <line x1="34" y1="86" x2="94" y2="86" stroke="#64748b" stroke-width="1.5" opacity="0.5"/>
+                        <!-- Dials -->
+                        <circle cx="114" cy="52" r="7" fill="#d97706"/>
+                        <circle cx="114" cy="72" r="7" fill="#d97706"/>
+                        <rect x="34" y="112" width="10" height="10" fill="#451a03"/>
+                        <rect x="106" y="112" width="10" height="10" fill="#451a03"/>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Right Column (5 cols): 3 Ornate Gold Frames + Neon Blue Musical Notes -->
+            <div class="lg:col-span-5 relative flex flex-col items-center">
+                <div class="grid grid-cols-2 gap-4 items-center">
+                    <div class="gold-frame w-36 h-44 sm:w-40 sm:h-48">
+                        <div class="gold-frame-inner">
+                            <img id="img-pl-1" src="assets/j1.jpeg" alt="Playlist Photo 1">
+                        </div>
+                    </div>
+                    <div class="gold-frame w-36 h-44 sm:w-40 sm:h-48 mt-6">
+                        <div class="gold-frame-inner">
+                            <img id="img-pl-2" src="assets/j2.jpeg" alt="Playlist Photo 2">
+                        </div>
+                    </div>
+                    <div class="gold-frame w-36 h-44 sm:w-40 sm:h-48 -mt-2">
+                        <div class="gold-frame-inner">
+                            <img id="img-pl-3" src="assets/j3.jpeg" alt="Playlist Photo 3">
+                        </div>
+                    </div>
+
+                    <!-- Glowing Neon Blue-Purple Musical Staff & Notes -->
+                    <div class="flex items-center justify-center">
+                        <svg class="w-36 h-28 drop-shadow-[0_0_14px_rgba(96,165,250,0.95)]" viewBox="0 0 180 120">
+                            <path d="M10 85 Q60 40 110 65 T170 30" fill="none" stroke="#60a5fa" stroke-width="2"/>
+                            <path d="M10 95 Q60 50 110 75 T170 40" fill="none" stroke="#a855f7" stroke-width="2"/>
+                            <path d="M10 105 Q60 60 110 85 T170 50" fill="none" stroke="#38bdf8" stroke-width="2"/>
+                            <text x="28" y="82" fill="#e0f2fe" font-size="34" font-weight="bold">♪</text>
+                            <text x="78" y="64" fill="#c084fc" font-size="38" font-weight="bold">♫</text>
+                            <text x="132" y="48" fill="#7dd3fc" font-size="32" font-weight="bold">♬</text>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- =====================================================================
+         GIFT SURPRISE MODAL (TRIGGERED BY GIFT BOX ON PAGE 2)
+    ====================================================================== -->
+    <div id="giftModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 backdrop-blur-sm p-4">
+        <div class="relative max-w-md w-full rounded-2xl bg-gradient-to-br from-[#3a0626] via-[#6e0d4b] to-[#b5137c] border-2 border-pink-300/40 p-7 text-center shadow-[0_24px_60px_rgba(0,0,0,0.85)] transform transition-all">
+            <div class="text-5xl mb-3 animate-bounce">🎁</div>
+            <h3 class="font-script text-4xl sm:text-5xl text-white mb-2">Special Gift For You</h3>
+            <p id="display-gift-text" class="font-letter italic text-base sm:text-lg text-pink-100 leading-relaxed mb-6">
+                "Satu tiket makan malam romantis & jalan-jalan seharian penuh ke La Alciendaa! Ditunggu yaaa di 21 November ❤️"
+            </p>
+            <div class="flex flex-wrap items-center justify-center gap-3">
+                <button onclick="closeGiftModal()" class="px-5 py-2.5 rounded-full bg-white text-[#7a0a52] font-bold text-sm hover:bg-pink-100 transition cursor-pointer">
+                    Tutup
+                </button>
+                <button onclick="closeGiftModal(); goToPage(0);" class="px-5 py-2.5 rounded-full bg-pink-500/40 border border-pink-200/50 text-white font-semibold text-sm hover:bg-pink-500/60 transition cursor-pointer">
+                    Ulang dari Amplop ✉️
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =====================================================================
+         PHOTO LIGHTBOX MODAL
+    ====================================================================== -->
+    <div id="lightboxModal" onclick="closeLightbox()" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/85 backdrop-blur-md p-4 cursor-zoom-out">
+        <img id="lightboxImg" src="" alt="Preview" class="max-w-full max-h-[85vh] rounded-lg border-4 border-white shadow-2xl">
+    </div>
+
+    <!-- =====================================================================
+         CUSTOMIZE / EDIT KADO DRAWER BUTTON & PANEL
+    ====================================================================== -->
+    <button id="openEditorBtn" onclick="toggleEditor()" title="Edit Nama, Foto, Pesan & Lagu" class="fixed bottom-4 left-4 z-40 w-10 h-10 rounded-full bg-black/45 hover:bg-black/75 border border-white/25 backdrop-blur-md flex items-center justify-center text-white/85 hover:text-white transition shadow-lg cursor-pointer">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+        </svg>
+    </button>
+
+    <aside id="editorDrawer" class="fixed inset-y-0 left-0 z-50 w-full max-w-sm bg-[#190512]/95 backdrop-blur-xl border-r border-pink-400/30 p-5 overflow-y-auto transform -translate-x-full transition-transform duration-300 shadow-2xl">
+        <div class="flex items-center justify-between border-b border-white/15 pb-3 mb-4">
+            <h3 class="font-bold text-lg text-pink-200">✨ Edit Kado Virtual</h3>
+            <button onclick="toggleEditor()" class="text-white/70 hover:text-white text-xl font-bold px-2 cursor-pointer">✕</button>
+        </div>
+
+        <div class="space-y-4 text-sm">
+            <div>
+                <label class="block text-pink-200/90 font-medium mb-1">Nama Penerima (Halaman Moment)</label>
+                <input id="input-name" type="text" class="w-full px-3 py-2 rounded-lg bg-white/10 border border-white/20 text-white focus:outline-none focus:border-pink-400" value="Freya Anindya">
+            </div>
+
+            <div>
+                <label class="block text-pink-200/90 font-medium mb-1">Tanggal Spesial (Amplop)</label>
+                <input id="input-date" type="text" class="w-full px-3 py-2 rounded-lg bg-white/10 border border-white/20 text-white focus:outline-none focus:border-pink-400" value="28.08.26">
+            </div>
+
+            <div>
+                <label class="block text-pink-200/90 font-medium mb-1">Ucapan Surat Ulang Tahun</label>
+                <textarea id="input-message" rows="4" class="w-full px-3 py-2 rounded-lg bg-white/10 border border-white/20 text-white focus:outline-none focus:border-pink-400">Selamat ulang tahun, Sayang. Di hari spesialmu ini, aku cuma mau bilang terima kasih karena sudah lahir ke dunia dan membawa begitu banyak kebahagiaan ke hidupku. Kamu adalah hal terindah yang pernah hadir dalam hidupku, dan aku berharap bisa terus merayakan hari-hari bahagiamu di tahun-tahun berikutnya. I love you so much, kini dan nanti.</textarea>
+            </div>
+
+            <div>
+                <label class="block text-pink-200/90 font-medium mb-1">Link Video YouTube (Playlist)</label>
+                <input id="input-youtube" type="text" placeholder="assets/video.mp4" class="w-full px-3 py-2 rounded-lg bg-white/10 border border-white/20 text-white focus:outline-none focus:border-pink-400" value="https://drive.google.com/file/d/1SjnbloUYIqlS93rPw_8AJ0tzkgoRedMe/view?usp=drive_link">
+            </div>
+
+            <div>
+                <label class="block text-pink-200/90 font-medium mb-1">Pesan Kejutan Gift Box</label>
+                <textarea id="input-gift" rows="2" class="w-full px-3 py-2 rounded-lg bg-white/10 border border-white/20 text-white focus:outline-none focus:border-pink-400">Satu tiket makan malam romantis & jalan-jalan seharian penuh ke tempat favoritmu! Berlaku kapan pun kamu siap ❤️</textarea>
+            </div>
+
+            <div class="pt-2 border-t border-white/15">
+                <label class="block text-pink-200/90 font-medium mb-1">Ganti Foto Utama (Upload dari Galeri)</label>
+                <input id="input-photo-main" type="file" accept="image/*" class="w-full text-xs text-pink-100 file:mr-3 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:bg-pink-600 file:text-white hover:file:bg-pink-500 cursor-pointer">
+            </div>
+
+            <div>
+                <label class="block text-pink-200/90 font-medium mb-1">Ganti Foto Galeri Journey (Pilih hingga 8 foto)</label>
+                <input id="input-photos-gallery" type="file" accept="image/*" multiple class="w-full text-xs text-pink-100 file:mr-3 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:bg-pink-600 file:text-white hover:file:bg-pink-500 cursor-pointer">
+            </div>
+
+            <div class="flex gap-2 pt-3">
+                <button onclick="saveCustomData()" class="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-pink-500 to-fuchsia-600 font-bold text-white shadow-lg hover:opacity-95 transition cursor-pointer">
+                    Simpan Perubahan
+                </button>
+                <button onclick="resetCustomData()" class="px-3.5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white/80 font-medium transition cursor-pointer">
+                    Reset
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <script>
+        /* =====================================================================
+           1. NAVIGATION & ENVELOPE OPENING SEQUENCE
+        ===================================================================== */
+        let currentPage = 0;
+
+        function goToPage(pageIndex) {
+            const pages = document.querySelectorAll('.page-section');
+            pages.forEach((sec, idx) => {
+                if (idx === pageIndex) {
+                    sec.classList.add('active');
+                } else {
+                    sec.classList.remove('active');
+                }
+            });
+            currentPage = pageIndex;
+        }
+
+        const sealedEnvelope = document.getElementById('sealedEnvelope');
+        const tapToLanjut = document.getElementById('tapToLanjut');
+
+        function openEnvelopeSequence() {
+            if (sealedEnvelope.classList.contains('opening')) return;
+            sealedEnvelope.classList.add('opening');
+            playChimeNote(523.25, 0.35);
+            setTimeout(() => playChimeNote(659.25, 0.45), 180);
+
+            setTimeout(() => {
+                goToPage(1);
+                setTimeout(() => {
+                    sealedEnvelope.classList.remove('opening');
+                }, 700);
+            }, 680);
+        }
+
+        sealedEnvelope.addEventListener('click', openEnvelopeSequence);
+        tapToLanjut.addEventListener('click', openEnvelopeSequence);
+
+        /* =====================================================================
+           2. MODALS (GIFT BOX & PHOTO LIGHTBOX)
+        ===================================================================== */
+        function openGiftModal() {
+            const modal = document.getElementById('giftModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            playChimeNote(783.99, 0.5);
+        }
+
+        function closeGiftModal() {
+            const modal = document.getElementById('giftModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function openLightbox(src) {
+            const lb = document.getElementById('lightboxModal');
+            document.getElementById('lightboxImg').src = src;
+            lb.classList.remove('hidden');
+            lb.classList.add('flex');
+        }
+
+        function closeLightbox() {
+            const lb = document.getElementById('lightboxModal');
+            lb.classList.add('hidden');
+            lb.classList.remove('flex');
+        }
+
+        /* =====================================================================
+           3. ROMANTIC MUSIC BOX AUDIO SYNTHESIZER (WEB AUDIO API)
+              Plays "Happy Birthday" music-box melody offline with zero broken links
+        ===================================================================== */
+        let audioCtx = null;
+        let isPlayingMusic = false;
+        let melodyTimer = null;
+        let noteStep = 0;
+
+        // Happy Birthday melody frequencies (Hz) & durations (ms)
+        const birthdayMelody = [
+            { f: 261.63, d: 320 }, { f: 261.63, d: 220 }, { f: 293.66, d: 520 }, { f: 261.63, d: 520 }, { f: 349.23, d: 520 }, { f: 329.63, d: 900 },
+            { f: 261.63, d: 320 }, { f: 261.63, d: 220 }, { f: 293.66, d: 520 }, { f: 261.63, d: 520 }, { f: 392.00, d: 520 }, { f: 349.23, d: 900 },
+            { f: 261.63, d: 320 }, { f: 261.63, d: 220 }, { f: 523.25, d: 520 }, { f: 440.00, d: 520 }, { f: 349.23, d: 450 }, { f: 329.63, d: 450 }, { f: 293.66, d: 850 },
+            { f: 466.16, d: 320 }, { f: 466.16, d: 220 }, { f: 440.00, d: 520 }, { f: 349.23, d: 520 }, { f: 392.00, d: 520 }, { f: 349.23, d: 950 }
+        ];
+
+        function playChimeNote(freq, durationSec = 0.5) {
+            try {
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+                gain.gain.setValueAtTime(0.001, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.14, audioCtx.currentTime + 0.03);
+                gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + durationSec);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + durationSec + 0.05);
+            } catch (e) {
+                // Ignore audio block if browser prevents autoplay
+            }
+        }
+
+        function stepMelody() {
+            if (!isPlayingMusic) return;
+            const note = birthdayMelody[noteStep % birthdayMelody.length];
+            playChimeNote(note.f, note.d / 900);
+            noteStep++;
+            melodyTimer = setTimeout(stepMelody, note.d);
+        }
+
+        function toggleMusicBox() {
+            const vinyl = document.getElementById('vinylWidget');
+            const icon = document.getElementById('musicPlayIcon');
+            const label = document.getElementById('musicLabel');
+
+            isPlayingMusic = !isPlayingMusic;
+            if (isPlayingMusic) {
+                vinyl.classList.add('vinyl-spinning');
+                icon.textContent = '⏸';
+                label.textContent = 'Pause Musik';
+                stepMelody();
+            } else {
+                vinyl.classList.remove('vinyl-spinning');
+                icon.textContent = '▶';
+                label.textContent = 'Play Musik';
+                clearTimeout(melodyTimer);
+            }
+        }
+
+        /* =====================================================================
+           4. CUSTOMIZATION EDITOR & LOCALSTORAGE PERSISTENCE
+        ===================================================================== */
+        const STORAGE_KEY = 'virtual_bday_gift_v1';
+
+        function toggleEditor() {
+            const drawer = document.getElementById('editorDrawer');
+            drawer.classList.toggle('-translate-x-full');
+        }
+
+        function extractYouTubeId(url) {
+            if (!url) return '5-v707P4_mY';
+            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+            const match = url.match(regExp);
+            return (match && match[2].length === 11) ? match[2] : url.trim();
+        }
+
+        function applyDataToDOM(data) {
+            if (data.name) {
+                document.getElementById('display-name').textContent = data.name;
+                document.getElementById('input-name').value = data.name;
+            }
+            if (data.date) {
+                document.getElementById('display-date').textContent = data.date;
+                document.getElementById('input-date').value = data.date;
+            }
+            if (data.message) {
+                document.getElementById('display-message').textContent = `"${data.message.replace(/^"|"$/g, '')}"`;
+                document.getElementById('input-message').value = data.message.replace(/^"|"$/g, '');
+            }
+            if (data.giftText) {
+                document.getElementById('display-gift-text').textContent = `"${data.giftText.replace(/^"|"$/g, '')}"`;
+                document.getElementById('input-gift').value = data.giftText.replace(/^"|"$/g, '');
+            }
+            if (data.youtubeUrl) {
+                document.getElementById('input-youtube').value = data.youtubeUrl;
+                const videoId = extractYouTubeId(data.youtubeUrl);
+                document.getElementById('youtubePlayer').src = `https://www.youtube.com/embed/${videoId}?rel=0`;
+            }
+            if (data.mainPhoto) {
+                ['img-p1-heart', 'img-moment-frame', 'img-pl-1', 'img-j-1'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.src = data.mainPhoto;
+                });
+            }
+            if (data.galleryPhotos && data.galleryPhotos.length > 0) {
+                data.galleryPhotos.forEach((src, i) => {
+                    const jEl = document.getElementById(`img-j-${i + 1}`);
+                    if (jEl) jEl.src = src;
+                    if (i === 0) document.getElementById('img-p1-polaroid').src = src;
+                    if (i === 1) document.getElementById('img-p1-strip1').src = src;
+                    if (i === 2) document.getElementById('img-p1-strip2').src = src;
+                    if (i === 3) document.getElementById('img-p1-strip3').src = src;
+                    if (i === 4) document.getElementById('img-pl-2').src = src;
+                    if (i === 5) document.getElementById('img-pl-3').src = src;
+                });
+            }
+        }
+
+        function readFileAsDataURL(file) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target.result);
+                reader.readAsDataURL(file);
+            });
+        }
+
+        async function saveCustomData() {
+            const existing = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+            const updated = {
+                ...existing,
+                name: document.getElementById('input-name').value.trim(),
+                date: document.getElementById('input-date').value.trim(),
+                message: document.getElementById('input-message').value.trim(),
+                youtubeUrl: document.getElementById('input-youtube').value.trim(),
+                giftText: document.getElementById('input-gift').value.trim(),
+            };
+
+            const mainFile = document.getElementById('input-photo-main').files[0];
+            if (mainFile) {
+                updated.mainPhoto = await readFileAsDataURL(mainFile);
+            }
+
+            const galleryFiles = Array.from(document.getElementById('input-photos-gallery').files).slice(0, 8);
+            if (galleryFiles.length > 0) {
+                updated.galleryPhotos = await Promise.all(galleryFiles.map(readFileAsDataURL));
+            }
+
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+            } catch (e) {
+                // Fallback if image sizes exceed localStorage quota
+            }
+
+            applyDataToDOM(updated);
+            toggleEditor();
+        }
+
+        function resetCustomData() {
+            localStorage.removeItem(STORAGE_KEY);
+            location.reload();
+        }
+
+        /* =====================================================================
+           5. AMBIENT FLOATING SPARKLES CANVAS
+        ===================================================================== */
+        function initSparkles() {
+            const canvas = document.getElementById('sparkleCanvas');
+            const ctx = canvas.getContext('2d');
+            let particles = [];
+
+            function resize() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+            window.addEventListener('resize', resize);
+            resize();
+
+            for (let i = 0; i < 42; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    r: Math.random() * 2.2 + 0.6,
+                    vx: (Math.random() - 0.5) * 0.25,
+                    vy: -Math.random() * 0.35 - 0.1,
+                    alpha: Math.random() * 0.6 + 0.2
+                });
+            }
+
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                particles.forEach(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    if (p.y < -10) p.y = canvas.height + 10;
+                    if (p.x < -10) p.x = canvas.width + 10;
+                    if (p.x > canvas.width + 10) p.x = -10;
+
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(255, 220, 245, ${p.alpha})`;
+                    ctx.fill();
+                });
+                requestAnimationFrame(animate);
+            }
+            animate();
+        }
+
+        window.onload = function () {
+            initSparkles();
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                try {
+                    applyDataToDOM(JSON.parse(saved));
+                } catch (e) {}
+            }
+        };
+    </script>
+</body>
+</html>
